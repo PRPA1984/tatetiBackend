@@ -5,6 +5,7 @@ class CreateBoards < ActiveRecord::Migration[6.1]
       t.string :first_player
       t.string :second_player
       t.text :board
+      t.string :winner
       t.timestamps
     end
   end

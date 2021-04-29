@@ -1,6 +1,7 @@
 class BoardsController < ApplicationController
 
     def newGame
+        
         board = Board.new(new_board_params)
         if board.save
             render(json: board, status: 200)
@@ -14,17 +15,29 @@ class BoardsController < ApplicationController
         #   El id va en el path(tabla)
         #   "player": "player",
         #   "selected_row"   
-        #}
-        board = Board.find(new_turn_params[:id])
-        row = new_turn_params[:selected_row]
-        byebug
-        if(board.board[row] == nil)
-            board.board[row] = new_turn_params[:player]
-            board.save
-            render(json: board, status: 200)
-        else 
-            render(json: board, status: 400)
-        end 
+        #
+        begin
+            board = Board.find(new_turn_params[:id])
+        rescue => exception
+            board = nil
+        end
+        
+        row = new_turn_params[:selected_row].to_i
+        player = new_turn_params[:player]
+        
+        if board == nil
+            status = 400
+            message = "Board not found"
+        elsif board.newTurn(row, player)
+            board.checkGame(player)
+            message = board
+            status = 200
+        else
+            message = board
+            status = 400
+        end
+
+        render(json: message, status: status)
     end
     
 

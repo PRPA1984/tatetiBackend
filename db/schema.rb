@@ -16,6 +16,7 @@ ActiveRecord::Schema.define(version: 2021_04_28_232257) do
     t.string "first_player"
     t.string "second_player"
     t.text "board"
+    t.string "winner"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
