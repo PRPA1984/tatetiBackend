@@ -2,28 +2,31 @@ class Board < ApplicationRecord
 
     serialize :board    
 
+    has_many :users #First user = Green, Second user = Red
 
-    validates :first_player, :second_player, presence: :true
-    
     before_create :before_create
 
     def before_create
         self.board = {}
+        self.turn = "green"
     end
     
-    def newTurn(row, player)
-        if(self.board[row] == nil && (player == self.first_player or player == self.second_player) && self.winner == nil)
-            self.board[row] = player
-            self.save
-            return true
-        else
-            return false
+
+    def checkUserColor(player)
+        if self.users.index(player) == 0
+            return "green"
+        elsif self.users.index(player) == 1
+            return "red"
         end
     end
 
     def setWinner(player)
-        self.winner = player
-        self.save
+        index = self.users.index(player)
+        if index == 0
+            self.winner = "green"
+        else
+            self.winner = "red"
+        end
     end
 
     def checkGame(player)
@@ -63,5 +66,7 @@ class Board < ApplicationRecord
                 self.setWinner(player)
             end
         end
+
+        return undefined
     end
 end

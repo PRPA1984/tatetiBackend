@@ -10,15 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_28_232257) do
+ActiveRecord::Schema.define(version: 2021_05_04_235932) do
 
   create_table "boards", force: :cascade do |t|
-    t.string "first_player"
-    t.string "second_player"
     t.text "board"
     t.string "winner"
+    t.string "turn"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "username"
+    t.string "name"
+    t.string "password"
+    t.string "token"
+    t.boolean "matchmaking"
+    t.integer "board_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["board_id"], name: "index_users_on_board_id"
   end
 
 end
