@@ -11,8 +11,7 @@ module UserService
         if user == nil
             return "User not found"
         else
-            user.token = SecureRandom.urlsafe_base64(nil, false)
-            user.save
+            user.update(token: SecureRandom.urlsafe_base64)
             return user.token
         end
     end
@@ -35,19 +34,13 @@ module UserService
         Board.joins(:users).where(users:{id: user.id})
     end
 
-    def logout(string_token)
-        if checkTokenFormat(string_token)
-            token = string_token.remove("bearer ")
-            user = User.find_by(token: token).first
-            if user == nil 
-                return "User not found"
-            else
-                user.token = nil
-                user.save
-                return true
-            end
+    def logout(token)
+        user = User.find_by(token: token).first
+        if user == nil 
+            return "User not found"
         else
-           return "Wrong token format"
+            user.update(token: nil)
+            return true
         end
     end
 end

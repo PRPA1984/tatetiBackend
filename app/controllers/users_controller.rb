@@ -1,42 +1,52 @@
-#require 'UserService.rb'
-include UserService
-
 class UsersController < ApplicationController
 
+    def current_user
+        begin
+            token = request.headers["Authorization"].remove("bearer ")
+            @current_user ||= User.find_by(token: token)
+            raise "User not found" if @current_user.blank?
+            return @current_user
+        rescue => exception
+            render(json: {"errors": exception.message}, status:500)
+        end
+
+    end
+
     def login
-        result = UserService.login(user_params)
-        if result == "User not found"
-            return render(json: {"errors": result}, status: 400)
+        username = user_params[:username]
+        password = user_params[:password]
+        user = User.find_by(username: username, password: password)
+        if user.blank?
+            return render(json: {"errors": "User not found"}, status: 400)
         else
-            return render(json: {"token": result}, status: 200)
+            token = user.generateToken
+            user.save
+            return render(json: {"token": token}, status: 200)
         end
     end
 
     def logout
-        result = UserService.logout(user_params)
-        if result == true
+        begin
+            current_user.update!(token: nil)
             return render(status:200)
-        else
-            return render(json: result, status:400)
+        rescue => exception
+            return render(json: current_user.errors.full_messages, status:400)
         end
     end
 
     def create
-        result = UserService.create(user_params)
-        if result.instance_of? User
-            return render(json: result, status:200)
+        user = User.new(user_params)
+        if user.save
+            return render(json: user.token, status:200)
         else
-            return render(json: {"errors": result}, status:400)
+            return render(json: {"errors": user.errors.full_messages}, status:400)
+
         end
     end
 
     def current
-        result = UserService.searchUserByToken(token)
-        if result.instance_of? User
-            return render(json: result, status: 200)
-        else
-            return render(json: {"errors": result}, status: 400)
-        end
+        byebug
+        render(json: current_user, status: 200)
     end
 
 
