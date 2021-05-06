@@ -1,34 +1,58 @@
-include BoardService
-
 class BoardsController < ApplicationController
+    def current_user
+        token = request.headers["Authorization"]
+        @current_user ||= User.find_by(token: token)
+    end
+
+    def current_board
+        @current_board ||= Board.preload(:users).find(params[:id])
+    end
 
     def newGame
-        result = BoardService.newGame(token)
-        if result.instance_of? Board
-            return render(json: result, status: 200)
-        elsif result == "In queue"
-            return render(json: {"state": result}, status: 200)
+        enemy_player = User.where(matchmaking: true).first
+        if enemy_player == nil
+            current_user.matchmaking = true
+            current_user.save
+            return render(json: {"state": 'In queue'}, status: 200)
         else
-            return render(json: {"errors": result, status: 400})
+            enemy_player.matchmaking = false
+            enemy_player.save
+            board = Board.new
+            board.users = [enemy_player, current_user]
+            board.save
+            return render(json: {
+                'board': board,
+                'green_player': board.users[0].name,
+                'red_player': board.users[1].name
+            }, status: 200)
         end
     end
 
     def newTurn
-        byebug
-        result = BoardService.newTurn(token, board_id, selected_row)
-        if result.instance_of? Board
-            return render(json: result, status: 200)
-        else
-            return render(json: {"errors": result, status:400})
+
+        row = params[:selected_row].to_i        
+        if current_board == nil
+            return render(json: {'errors': 'Board not found'}, status: 400)
+        elsif current_board.winner != nil
+            return render(json: {'errors': 'There is already a winner:' + current_board.winner, status:400})
+        elsif current_board.checkUserColor(current_user) != current_board.turn
+            render(json: {'errors': "This is not your turn", status:400})
         end
+        current_board[row] = current_user
+        current_board.checkGame(current_user)
+        current_board.save
+        return render(json: current_board, status: 200)
     end
 
     def show
-        result = BoardService.current_board(token, board_id)
-        if result.instance_of? Board
-            return render(json: result, status: 200)
+        if current_board.present?
+            return render(json: {
+                'board': current_board,
+                'green_player': current_board.users[0].name,
+                'red_player': current_board.users[1].name
+            }, status: 200)
         else
-            return render(json: {"errors": result}, status: 400)
+            return render(json: {"errors": "Board not found"}, status: 400)
         end
     end
     

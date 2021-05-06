@@ -7,7 +7,6 @@ class CreateUsers < ActiveRecord::Migration[6.1]
       t.string :password
       t.string :token
       t.boolean :matchmaking
-      t.belongs_to :board
       t.timestamps
     end
   end

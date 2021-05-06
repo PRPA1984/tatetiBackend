@@ -1,15 +1,8 @@
 class UsersController < ApplicationController
 
     def current_user
-        begin
-            token = request.headers["Authorization"].remove("bearer ")
-            @current_user ||= User.find_by(token: token)
-            raise "User not found" if @current_user.blank?
-            return @current_user
-        rescue => exception
-            render(json: {"errors": exception.message}, status:500)
-        end
-
+        token = request.headers["Authorization"]
+        @current_user ||= User.find_by(token: token)
     end
 
     def login
@@ -27,8 +20,12 @@ class UsersController < ApplicationController
 
     def logout
         begin
-            current_user.update!(token: nil)
-            return render(status:200)
+            if current_user.present?
+                current_user.update!(token: nil)
+                return render(status:200)
+            else
+                render(json: {"errors": "User not found"}, status:400)
+            end
         rescue => exception
             return render(json: current_user.errors.full_messages, status:400)
         end
@@ -45,8 +42,23 @@ class UsersController < ApplicationController
     end
 
     def current
-        byebug
-        render(json: current_user, status: 200)
+        if current_user.present?
+            render(json: current_user, status: 200)
+        else
+            render(json: {'errors': 'User not found'}, status: 400)
+        end
+    end
+
+    def matchHistory
+        if current_user.present?
+            if current_user.boards.present?
+                return render(json: current_user.boards, status: 200)
+            else
+                return render(json: {'errors': 'Boards not found'}, status: 400)
+            end
+        else
+            return render(json: {'errors': 'User not found'}, status: 400)
+        end
     end
 
 

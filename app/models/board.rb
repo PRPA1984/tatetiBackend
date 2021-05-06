@@ -2,7 +2,7 @@ class Board < ApplicationRecord
 
     serialize :board    
 
-    has_many :users #First user = Green, Second user = Red
+    has_and_belongs_to_many :users, join_table: "boards_users" #First user = Green, Second user = Red
 
     before_create :before_create
 
