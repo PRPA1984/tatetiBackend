@@ -34,11 +34,14 @@ class BoardsController < ApplicationController
         if current_board == nil
             return render(json: {'errors': 'Board not found'}, status: 400)
         elsif current_board.winner != nil
-            return render(json: {'errors': 'There is already a winner:' + current_board.winner, status:400})
+            return render(json: {'errors': 'There is already a winner: ' + current_board.getPlayerNameBycolor(current_board.winner), status:400})
         elsif current_board.checkUserColor(current_user) != current_board.turn
-            render(json: {'errors': "This is not your turn", status:400})
+            return render(json: {'errors': "This is not your turn", status:400})
+        elsif
+            current_board.board[row].present?
+            return render(json: {'errors': "This row is not available", status:400})
         end
-        current_board[row] = current_user
+        current_board.newMovement(current_user, row)
         current_board.checkGame(current_user)
         current_board.save
         return render(json: current_board, status: 200)

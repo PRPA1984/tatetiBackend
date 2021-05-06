@@ -51,8 +51,17 @@ class UsersController < ApplicationController
 
     def matchHistory
         if current_user.present?
-            if current_user.boards.present?
-                return render(json: current_user.boards, status: 200)
+            boards = Board.joins(:users).where(users: {id: current_user.id})
+            if boards.present?
+                boards.map { |board|
+                    {
+                        "board": board,
+                        "green_player": board.users[0].name,
+                        "red_player": board.users[1].name
+                    }
+                }
+                byebug
+                return render(json: boards, status: 200)
             else
                 return render(json: {'errors': 'Boards not found'}, status: 400)
             end

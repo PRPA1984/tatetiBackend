@@ -9,7 +9,7 @@ class User < ApplicationRecord
     before_create :generateToken
 
     def generateToken
-        self.token = SecureRandom.urlsafe_base64
+        self.token = SecureRandom.urlsafe_base64(nil, false)
         return token
     end
 end

@@ -20,6 +20,23 @@ class Board < ApplicationRecord
         end
     end
 
+    def getPlayerNameBycolor(color)
+        if color == "green"
+            return self.users[0].name
+        elsif color == "red"
+            return self.users[1].name
+        end
+    end
+
+    def newMovement(player, row)
+        self.board[row] = player.name
+        if self.checkUserColor(player) == "green"
+            self.turn = "red"
+        else
+            self.turn = "green"
+        end
+    end
+
     def setWinner(player)
         index = self.users.index(player)
         if index == 0
@@ -33,7 +50,7 @@ class Board < ApplicationRecord
 
         array = []
         self.board.each do |key,value|
-            if value == player
+            if value == player.name
                 array.push(key)
             end
             
@@ -66,7 +83,5 @@ class Board < ApplicationRecord
                 self.setWinner(player)
             end
         end
-
-        return undefined
     end
 end
