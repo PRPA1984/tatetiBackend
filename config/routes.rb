@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   resources :boards, only: [:show] do
     collection do
       get :newGame
+      get :lastBoard
+      get :userState
     end
 
     member do

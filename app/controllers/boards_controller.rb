@@ -24,10 +24,34 @@ class BoardsController < ApplicationController
             board.users = [enemy_player, current_user]
             board.save
             return render(json: {
-                'board': board,
-                'green_player': board.users[0].name,
-                'red_player': board.users[1].name
+                    "id": board.id,
+                    "board": board.board,
+                    "turn": board.turn,
+                    "winner": board.winner,
+                    "greenPlayer": board.users[0].name,
+                    "redPlayer": board.users[1].name
             }, status: 200)
+        end
+    end
+
+    def lastBoard
+        board = Board.joins(:users).where(users: {id: current_user.id}).order(:created_at).last
+        return render(json: {
+            "id": board.id,
+            "board": board.board,
+            "turn": board.turn,
+            "winner": board.winner,
+            "greenPlayer": board.users[0].name,
+            "redPlayer": board.users[1].name
+            }, status: 200)  
+    end
+
+    def userState
+        if current_user.matchmaking
+            return render(json: {"state": 'In queue'}, status: 200)
+        else
+            return render(json: {"state": 'Not in queue'}, status: 200)
+
         end
     end
 
@@ -47,16 +71,25 @@ class BoardsController < ApplicationController
         current_board.newMovement(current_user, row)
         current_board.checkGame(current_user)
         current_board.save
-        return render(json: current_board, status: 200)
-    end
+        return render(json: {
+            "id": board.id,
+            "board": board.board,
+            "turn": board.turn,
+            "winner": board.winner,
+            "greenPlayer": board.users[0].name,
+            "redPlayer": board.users[1].name
+    }, status: 200)    end
 
     def show
         if current_board.present?
             return render(json: {
-                'board': current_board,
-                'green_player': current_board.users[0].name,
-                'red_player': current_board.users[1].name
-            }, status: 200)
+                "id": board.id,
+                "board": board.board,
+                "turn": board.turn,
+                "winner": board.winner,
+                "greenPlayer": board.users[0].name,
+                "redPlayer": board.users[1].name
+        }, status: 200)
         else
             return render(json: {"errors": "Board not found"}, status: 400)
         end
