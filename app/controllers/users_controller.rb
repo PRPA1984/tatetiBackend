@@ -43,7 +43,11 @@ class UsersController < ApplicationController
 
     def current
         if current_user.present?
-            render(json: current_user, status: 200)
+            render(json: {
+                "id": current_user.id,
+                "name": current_user.name,
+                "matchmaking": current_user.matchmaking
+            }, status: 200)
         else
             render(json: {'errors': 'User not found'}, status: 400)
         end

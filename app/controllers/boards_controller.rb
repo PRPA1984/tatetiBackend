@@ -9,6 +9,9 @@ class BoardsController < ApplicationController
     end
 
     def newGame
+        if current_user.matchmaking
+            return render(json: {"state": 'In queue'}, status: 200)
+        end
         enemy_player = User.where(matchmaking: true).first
         if enemy_player == nil
             current_user.matchmaking = true
