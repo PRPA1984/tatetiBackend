@@ -34,7 +34,7 @@ class UsersController < ApplicationController
     def create
         user = User.new(user_params)
         if user.save
-            return render(json: user.token, status:200)
+            return render(json: {"token": user.token}, status:200)
         else
             return render(json: {"errors": user.errors.full_messages}, status:400)
 
@@ -57,14 +57,15 @@ class UsersController < ApplicationController
         if current_user.present?
             boards = Board.joins(:users).where(users: {id: current_user.id})
             if boards.present?
-                boards.map { |board|
+                boards = boards.map { |board|
                     {
-                        "board": board,
-                        "green_player": board.users[0].name,
-                        "red_player": board.users[1].name
+                        "id":board.id,
+                        "board": board.board,
+                        "greenPlayer": board.users[0].name,
+                        "redPlayer": board.users[1].name,
+                        "winner": board.winner
                     }
                 }
-                byebug
                 return render(json: boards, status: 200)
             else
                 return render(json: {'errors': 'Boards not found'}, status: 400)

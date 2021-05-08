@@ -38,12 +38,7 @@ class Board < ApplicationRecord
     end
 
     def setWinner(player)
-        index = self.users.index(player)
-        if index == 0
-            self.winner = "green"
-        else
-            self.winner = "red"
-        end
+        self.winner = player.name
     end
 
     def checkGame(player)

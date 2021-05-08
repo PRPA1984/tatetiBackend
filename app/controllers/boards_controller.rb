@@ -72,23 +72,23 @@ class BoardsController < ApplicationController
         current_board.checkGame(current_user)
         current_board.save
         return render(json: {
-            "id": board.id,
-            "board": board.board,
-            "turn": board.turn,
-            "winner": board.winner,
-            "greenPlayer": board.users[0].name,
-            "redPlayer": board.users[1].name
+            "id": current_board.id,
+            "board": current_board.board,
+            "turn": current_board.turn,
+            "winner": current_board.winner,
+            "greenPlayer": current_board.users[0].name,
+            "redPlayer": current_board.users[1].name
     }, status: 200)    end
 
     def show
         if current_board.present?
             return render(json: {
-                "id": board.id,
-                "board": board.board,
-                "turn": board.turn,
-                "winner": board.winner,
-                "greenPlayer": board.users[0].name,
-                "redPlayer": board.users[1].name
+                "id": current_board.id,
+                "board": current_board.board,
+                "turn": current_board.turn,
+                "winner": current_board.winner,
+                "greenPlayer": current_board.users[0].name,
+                "redPlayer": current_board.users[1].name
         }, status: 200)
         else
             return render(json: {"errors": "Board not found"}, status: 400)
