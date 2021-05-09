@@ -5,12 +5,16 @@ class UsersController < ApplicationController
         @current_user ||= User.find_by(token: token)
     end
 
+    def formatError(error)
+        return {"error": error}
+    end
+
     def login
         username = user_params[:username]
         password = user_params[:password]
         user = User.find_by(username: username, password: password)
         if user.blank?
-            return render(json: {"errors": "User not found"}, status: 400)
+            return render(json: formatError("User not found"), status: 500)
         else
             token = user.generateToken
             user.save
@@ -24,7 +28,7 @@ class UsersController < ApplicationController
                 current_user.update!(token: nil)
                 return render(status:200)
             else
-                render(json: {"errors": "User not found"}, status:400)
+                return render(json: formatError("User not found"), status: 500)
             end
         rescue => exception
             return render(json: current_user.errors.full_messages, status:400)
@@ -49,7 +53,7 @@ class UsersController < ApplicationController
                 "matchmaking": current_user.matchmaking
             }, status: 200)
         else
-            render(json: {'errors': 'User not found'}, status: 400)
+            return render(json: formatError("User not found"), status: 500)
         end
     end
 
@@ -68,10 +72,10 @@ class UsersController < ApplicationController
                 }
                 return render(json: boards, status: 200)
             else
-                return render(json: {'errors': 'Boards not found'}, status: 400)
+                return render(json: formatError("Boards not found"), status: 500)
             end
         else
-            return render(json: {'errors': 'User not found'}, status: 400)
+            return render(json: formatError("User not found"), status: 500)
         end
     end
 

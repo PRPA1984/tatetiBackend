@@ -8,6 +8,10 @@ class BoardsController < ApplicationController
         @current_board ||= Board.preload(:users).find(params[:id])
     end
 
+    def formatError(error)
+        return {"error": error}
+    end
+
     def newGame
         if current_user.matchmaking
             return render(json: {"state": 'In queue'}, status: 200)
@@ -59,14 +63,14 @@ class BoardsController < ApplicationController
 
         row = params[:selected_row].to_i        
         if current_board == nil
-            return render(json: {'errors': 'Board not found'}, status: 400)
+            return render(json: formatError("Board not found"), status: 500)
         elsif current_board.winner != nil
-            return render(json: {'errors': 'There is already a winner: ' + current_board.getPlayerNameBycolor(current_board.winner), status:400})
+            return render(json: formatError('There is already a winner'), status:500)
         elsif current_board.checkUserColor(current_user) != current_board.turn
-            return render(json: {'errors': "This is not your turn", status:400})
+            return render(json: formatError("This is not your turn"), status:500)
         elsif
             current_board.board[row].present?
-            return render(json: {'errors': "This row is not available", status:400})
+            return render(json: formatError("This row is not available"), status:400)
         end
         current_board.newMovement(current_user, row)
         current_board.checkGame(current_user)
@@ -91,7 +95,7 @@ class BoardsController < ApplicationController
                 "redPlayer": current_board.users[1].name
         }, status: 200)
         else
-            return render(json: {"errors": "Board not found"}, status: 400)
+            return render(json: formatError("Board not found"), status: 400)
         end
     end
     
