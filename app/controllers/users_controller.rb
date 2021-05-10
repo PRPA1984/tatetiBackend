@@ -40,8 +40,8 @@ class UsersController < ApplicationController
         if user.save
             return render(json: {"token": user.token}, status:200)
         else
-            return render(json: {"errors": user.errors.full_messages}, status:400)
-
+            errors = user.errors.full_messages.join(" and ")
+            return render(json: formatError(errors), status:500)
         end
     end
 
