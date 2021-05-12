@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       get :newGame
       get :lastBoard
       get :userState
+      get :matchHistory
     end
 
     member do
@@ -17,7 +18,6 @@ Rails.application.routes.draw do
     collection do
       get :logout
       get :current
-      get :matchHistory
       post :login
     end
   end
