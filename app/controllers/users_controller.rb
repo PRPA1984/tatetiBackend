@@ -14,7 +14,7 @@ class UsersController < ApplicationController
         password = user_params[:password]
         user = User.find_by(username: username, password: password)
         if user.blank?
-            return render(json: formatError("User not found"), status: 500)
+            return render(json: formatError("User not found"), status: 400)
         else
             token = user.generateToken
             user.save
@@ -28,7 +28,7 @@ class UsersController < ApplicationController
                 current_user.update!(token: nil)
                 return render(status:200)
             else
-                return render(json: formatError("User not found"), status: 500)
+                return render(json: formatError("User not found"), status: 400)
             end
         rescue => exception
             return render(json: current_user.errors.full_messages, status:400)
@@ -41,7 +41,7 @@ class UsersController < ApplicationController
             return render(json: {"token": user.token}, status:200)
         else
             errors = user.errors.full_messages.join(" and ")
-            return render(json: formatError(errors), status:500)
+            return render(json: formatError(errors), status:400)
         end
     end
 
@@ -53,29 +53,7 @@ class UsersController < ApplicationController
                 "matchmaking": current_user.matchmaking
             }, status: 200)
         else
-            return render(json: formatError("User not found"), status: 500)
-        end
-    end
-
-    def matchHistory
-        if current_user.present?
-            boards = Board.joins(:users).where(users: {id: current_user.id})
-            if boards.present?
-                boards = boards.map { |board|
-                    {
-                        "id":board.id,
-                        "board": board.board,
-                        "greenPlayer": board.users[0].name,
-                        "redPlayer": board.users[1].name,
-                        "winner": board.winner
-                    }
-                }
-                return render(json: boards, status: 200)
-            else
-                return render(json: formatError("Boards not found"), status: 500)
-            end
-        else
-            return render(json: formatError("User not found"), status: 500)
+            return render(json: formatError("User not found"), status: 400)
         end
     end
 

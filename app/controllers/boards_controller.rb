@@ -13,7 +13,9 @@ class BoardsController < ApplicationController
     end
 
     def newGame
-        if current_user.matchmaking
+        if current_user.blank?
+            return render(json: formatError("User not found"), status: 400)
+        elsif current_user.matchmaking
             return render(json: {"state": 'In queue'}, status: 200)
         end
         enemy_player = User.where(matchmaking: true).first
@@ -39,7 +41,13 @@ class BoardsController < ApplicationController
     end
 
     def lastBoard
+        if current_user.blank?
+            return render(json: formatError("User not found"), status: 400)
+        end
         board = Board.joins(:users).where(users: {id: current_user.id}).order(:created_at).last
+        if board.blank?
+            return render(json: formatError("Board not found"), status: 400)
+        end
         return render(json: {
             "id": board.id,
             "board": board.board,
@@ -51,11 +59,12 @@ class BoardsController < ApplicationController
     end
 
     def userState
-        if current_user.matchmaking
+        if current_user.blank?
+            return render(json: formatError("User not found"), status: 400)
+        elsif current_user.matchmaking
             return render(json: {"state": 'In queue'}, status: 200)
         else
             return render(json: {"state": 'Not in queue'}, status: 200)
-
         end
     end
 
@@ -63,13 +72,14 @@ class BoardsController < ApplicationController
 
         row = params[:selected_row].to_i        
         if current_board == nil
-            return render(json: formatError("Board not found"), status: 500)
+            return render(json: formatError("Board not found"), status: 400)
+        elsif current_user.blank?
+            return render(json: formatError("User not found"), status: 400)
         elsif current_board.winner != nil
-            return render(json: formatError('There is already a winner'), status:500)
+            return render(json: formatError('There is already a winner'), status:400)
         elsif current_board.checkUserColor(current_user) != current_board.turn
-            return render(json: formatError("This is not your turn"), status:500)
-        elsif
-            current_board.board[row].present?
+            return render(json: formatError("This is not your turn"), status:400)
+        elsif current_board.board[row].present?
             return render(json: formatError("This row is not available"), status:400)
         end
         current_board.newMovement(current_user, row)
@@ -96,6 +106,28 @@ class BoardsController < ApplicationController
         }, status: 200)
         else
             return render(json: formatError("Board not found"), status: 400)
+        end
+    end
+
+    def matchHistory
+        if current_user.present?
+            boards = Board.joins(:users).where(users: {id: current_user.id})
+            if boards.present?
+                boards = boards.map { |board|
+                    {
+                        "id":board.id,
+                        "board": board.board,
+                        "greenPlayer": board.users[0].name,
+                        "redPlayer": board.users[1].name,
+                        "winner": board.winner
+                    }
+                }
+                return render(json: boards, status: 200)
+            else
+                return render(json: formatError("Boards not found"), status: 400)
+            end
+        else
+            return render(json: formatError("User not found"), status: 400)
         end
     end
     
