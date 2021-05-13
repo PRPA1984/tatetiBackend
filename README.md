@@ -1,24 +1,132 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+El backend se expone en localhost:3000
 
-Things you may want to cover:
+Los endpoints son:
 
-* Ruby version
+## Login:
 
-* System dependencies
+Path: POST /users/login
 
-* Configuration
+Body
 
-* Database creation
+```
+{
+  "username": "user",
+  "password": "pass"
+}
+```
 
-* Database initialization
+### Success Response
 
-* How to run the test suite
+Response
 
-* Services (job queues, cache servers, search engines, etc.)
+```
+{
+  "token" : "token"
+}
+```
 
-* Deployment instructions
 
-* ...
+### Error Response
+
+
+400 Bad Request
+
+```
+{
+   "error" : "User not Found"
+}
+```
+
+## Logout:
+
+Path: GET /users/logout
+
+Header Autorización
+
+```
+Authorization={token}
+```
+
+### Success Response
+
+Response Status 200
+
+
+### Error Response
+
+
+400 Bad Request
+
+```
+{
+   "error" : "User not Found"
+}
+```
+
+## Crear nuevo usuario:
+
+Path: POST /users
+
+Body
+
+```
+{
+    "username": "user",
+    "password": "pass",
+    "name": "nombre"
+}
+```
+
+### Success Response
+
+Response
+
+```
+{
+  "token" : "token"
+}
+```
+
+
+### Error Response
+
+
+400 Bad Request
+
+```
+{
+   "error" : "errors"
+}
+```
+
+## Current User:
+
+Path: GET /users/current
+
+Header Autorización
+
+```
+Authorization={token}
+```
+
+### Success Response
+
+```
+{
+    "id": id,
+    "name": "name",
+    "matchmaking": true
+}
+```
+### Error Response
+
+
+400 Bad Request
+
+```
+{
+   "error" : "User not Found"
+}
+```
