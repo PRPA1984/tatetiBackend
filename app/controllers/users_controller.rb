@@ -1,37 +1,30 @@
 class UsersController < ApplicationController
 
-    def current_user
-        token = request.headers["Authorization"]
-        @current_user ||= User.find_by(token: token)
-    end
-
-    def formatError(error)
-        return {"error": error}
-    end
+    before_action :validateCurrentUserNotBlank, only: [:logout, :current]
 
     def login
-        username = user_params[:username]
-        password = user_params[:password]
-        user = User.find_by(username: username, password: password)
-        if user.blank?
-            return render(json: formatError("User not found"), status: 400)
-        else
-            token = user.generateToken
-            user.save
-            return render(json: {"token": token}, status: 200)
+        begin
+            username = user_params[:username]
+            password = user_params[:password]
+            user = User.find_by(username: username, password: password)
+            if user.present?
+                token = user.generateToken
+                user.save!
+                return render(json: {"token": token}, status: 200)
+            else
+                return render(json: formatError("User not found"), status: 400)
+            end
+        rescue => exception
+            return render(json: formatError(current_user.errors.full_messages.join(", ")), status:400)
         end
     end
 
     def logout
         begin
-            if current_user.present?
-                current_user.update!(token: nil)
-                return render(status:200)
-            else
-                return render(json: formatError("User not found"), status: 400)
-            end
+            current_user.update!(token: nil)
+            return render(status:200)
         rescue => exception
-            return render(json: current_user.errors.full_messages, status:400)
+            return render(json: formatError(current_user.errors.full_messages.join(", ")), status:400)
         end
     end
 
@@ -40,21 +33,13 @@ class UsersController < ApplicationController
         if user.save
             return render(json: {"token": user.token}, status:200)
         else
-            errors = user.errors.full_messages.join(" and ")
+            errors = user.errors.full_messages.join(", ")
             return render(json: formatError(errors), status:400)
         end
     end
 
     def current
-        if current_user.present?
-            render(json: {
-                "id": current_user.id,
-                "name": current_user.name,
-                "matchmaking": current_user.matchmaking
-            }, status: 200)
-        else
-            return render(json: formatError("User not found"), status: 400)
-        end
+        render(json: userFormat(current_user), status: 200)
     end
 
 

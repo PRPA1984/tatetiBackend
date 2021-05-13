@@ -10,6 +10,6 @@ class User < ApplicationRecord
 
     def generateToken
         self.token = SecureRandom.urlsafe_base64(nil, false)
-        return token
+        return self.token
     end
 end
