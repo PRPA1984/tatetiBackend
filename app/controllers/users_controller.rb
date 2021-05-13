@@ -16,7 +16,7 @@ class UsersController < ApplicationController
     end
 
     def logout
-        current_user.update!(token: nil)
+        current_user.update(token: nil)
         return render(status:200)
     end
 
