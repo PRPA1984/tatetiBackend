@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
 
     before_action :validateCurrentUserNotBlank, only: [:logout, :current]
-º
+
     def login
         username = user_params[:username]
         password = user_params[:password]
