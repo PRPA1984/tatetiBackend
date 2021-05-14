@@ -153,7 +153,7 @@ Si no encuentra un usuario con quien jugar, el usuario queda en cola con matchma
     "state" : "In queue
 }
 ```
-Si había alguien en cola, ambos empìezan a jugar.
+Si había alguien en cola, ambos empìezan a jugar. En este JSON, el atributo board es un hash que contiene valores del 1 al 9 como llaves para señalar las posiciones dentro de la tabla de tateti. La llave está asociada a 2 valores: nil en caso de que no esté ocupada, caso contrario, el nombre del usuario que la ocupa.
 ```
 {
             "id": id,
